@@ -32,5 +32,5 @@ export default defineConfig({
     port: 3000,
     open: true
   },
-  base: process.env.NODE_ENV === 'production' ? '/chapter/' : '/'
+  base: process.env.VERCEL ? '/' : (process.env.NODE_ENV === 'production' ? '/chapter/' : '/')
 })
