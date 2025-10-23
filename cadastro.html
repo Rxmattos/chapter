@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro de Cliente</title>
+  <style>
+    :root{
+      --bg: #0e0f13;
+      --panel: #161821;
+      --panel-2: #1b1e29;
+      --text: #e9eaf0;
+      --muted: #a8adbd;
+      --border: #2a2f3f;
+      --focus: #8b5cf6;   /* roxo */
+      --ok: #22c55e;
+      --shadow: 0 8px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 500px at 80% -10%, rgba(139,92,246,.12), transparent 60%),
+        radial-gradient(700px 400px at -10% 110%, rgba(139,92,246,.08), transparent 60%),
+        var(--bg);
+    }
+
+    /* App shell */
+    .wrap{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:saturate(140%) blur(8px);
+      background: linear-gradient(180deg, rgba(22,24,33,.85), rgba(22,24,33,.65));
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1100px; margin:0 auto; padding:16px 20px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:36px; height:36px; border-radius:10px;
+      background: radial-gradient(120% 120% at 30% 20%, #b39afc, #7c5cf6);
+      box-shadow: 0 4px 14px rgba(124,92,246,.35);
+    }
+    .title h1{font-size:18px; margin:0;}
+    .title small{display:block; color:var(--muted); margin-top:2px; font-size:12px}
+
+    main{flex:1}
+    .container{max-width:1100px; margin:28px auto; padding:0 20px}
+
+    /* Panel / card */
+    .panel{
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:18px 18px 0 18px;
+    }
+    .panel-head h2{
+      margin:0 0 6px 0; font-size:18px; letter-spacing:.2px;
+    }
+    .panel-head p{
+      margin:0 0 16px 0; color:var(--muted); font-size:13.5px;
+    }
+    .panel-body{padding:18px}
+
+    /* Form */
+    form{display:grid; gap:14px}
+    .grid{
+      display:grid; gap:14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width:720px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+      .grid .span-2{ grid-column: span 2; }
+    }
+    label{
+      display:block; font-size:12px; color:var(--muted);
+      margin:0 0 8px 2px; letter-spacing:.3px;
+    }
+    .field{
+      background:#12141b;
+      border:1px solid var(--border);
+      border-radius:14px; padding:12px 14px;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .field:focus{
+      outline:none;
+      border-color: color-mix(in srgb, var(--focus) 65%, white 0%);
+      box-shadow: 0 0 0 3px rgba(139,92,246,.2);
+      background:#10121a;
+    }
+    input, select{
+      width:100%; font:inherit; color:var(--text);
+      background:transparent; border:0; outline:0;
+    }
+    .row{
+      display:flex; gap:12px;
+    }
+
+    /* Actions */
+    .actions{
+      display:flex; gap:10px; justify-content:flex-end; margin-top:8px;
+    }
+    .btn{
+      appearance:none; border:1px solid var(--border);
+      background:#0f1118; color:var(--text);
+      padding:12px 16px; border-radius:14px; cursor:pointer;
+      transition: transform .06s ease, background .2s, border-color .2s;
+      font-weight:600; letter-spacing:.2px;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary:hover{ background:#141723 }
+    .btn.primary{
+      border:0;
+      background: linear-gradient(90deg, #7c5cf6, #9b7bff);
+      box-shadow: 0 10px 22px rgba(124,92,246,.35), inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .btn.primary:hover{ filter: brightness(1.06); }
+    .hint{color:var(--muted); font-size:12px; margin-top:2px}
+
+    /* Footer accent */
+    .accent{
+      height:4px;
+      background: linear-gradient(90deg, #7c5cf6 0%, rgba(124,92,246,0) 60%),
+                  linear-gradient(90deg, rgba(124,92,246,0) 40%, #7c5cf6 100%);
+      opacity:.7; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius);
+    }
+    /* Tiny helper message */
+    .toast{
+      position:fixed; right:16px; bottom:16px;
+      background:#0f121a; border:1px solid var(--border); color:var(--text);
+      padding:10px 14px; border-radius:12px; box-shadow:var(--shadow); display:none;
+      font-size:13px;
+    }
+    .toast.show{display:block; animation: fade .25s ease-out}
+    @keyframes fade{from{opacity:.0; transform:translateY(6px)} to{opacity:1; transform:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Cadastro de Cliente</h1>
+          <small>Registre os dados básicos da empresa</small>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <section class="panel" aria-label="Formulário de Cadastro">
+          <div class="panel-head">
+            <h2>Dados da Empresa</h2>
+            <p>Preencha os campos abaixo. Os formatos de CNPJ e telefone são validados automaticamente.</p>
+          </div>
+          <div class="panel-body">
+            <form id="formCadastro" novalidate>
+              <div class="grid">
+                <div>
+                  <label for="cnpj">CNPJ</label>
+                  <div class="field">
+                    <input id="cnpj" name="cnpj" type="text" inputmode="numeric"
+                           placeholder="00.000.000/0000-00"
+                           aria-describedby="hint-cnpj"
+                           autocomplete="off" maxlength="18" required>
+                  </div>
+                  <div id="hint-cnpj" class="hint">Ex.: 12.345.678/0001-90</div>
+                </div>
+
+                <div>
+                  <label for="razao">Razão Social</label>
+                  <div class="field">
+                    <input id="razao" name="razao" type="text" placeholder="Nome legal da empresa" required>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="fantasia">Nome da Empresa</label>
+                  <div class="field">
+                    <input id="fantasia" name="fantasia" type="text" placeholder="Nome fantasia" required>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="telefone">Telefone de Contato</label>
+                  <div class="field">
+                    <input id="telefone" name="telefone" type="text" inputmode="tel"
+                           placeholder="(11) 98888-7777"
+                           maxlength="16" required>
+                  </div>
+                </div>
+
+                <div class="span-2">
+                  <label for="contato">Contato (responsável)</label>
+                  <div class="field">
+                    <input id="contato" name="contato" type="text" placeholder="Nome completo" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="reset" class="btn secondary">Limpar</button>
+                <button type="submit" class="btn primary">Salvar cadastro</button>
+              </div>
+            </form>
+          </div>
+          <div class="accent" aria-hidden="true"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast">Cadastro salvo (simulação)</div>
+
+  <script>
+    // Máscara simples de CNPJ e Telefone (vanilla)
+    const cnpj = document.getElementById('cnpj');
+    const tel  = document.getElementById('telefone');
+    const toast = document.getElementById('toast');
+
+    const mask = {
+      cnpj(v){
+        v = v.replace(/\D/g,'').slice(0,14);
+        v = v.replace(/^(\d{2})(\d)/, "$1.$2");
+        v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+        v = v.replace(/\.(\d{3})(\d)/, ".$1/$2");
+        v = v.replace(/(\d{4})(\d)/, "$1-$2");
+        return v;
+      },
+      phone(v){
+        v = v.replace(/\D/g,'').slice(0,11);
+        if(v.length>10){
+          return v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+        }
+        return v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+      }
+    };
+
+    cnpj.addEventListener('input', e => e.target.value = mask.cnpj(e.target.value));
+    tel.addEventListener('input',  e => e.target.value = mask.phone(e.target.value));
+
+    // Simulação de envio com UX de feedback
+    document.getElementById('formCadastro').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      // validações simples
+      const ok = [...e.target.querySelectorAll('input[required]')].every(i => i.value.trim().length);
+      if(!ok){
+        toast.textContent = 'Preencha todos os campos obrigatórios';
+      }else{
+        toast.textContent = 'Cadastro salvo (simulação)';
+        e.target.reset();
+      }
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 2200);
+    });
+  </script>
+</body>
+</html>
